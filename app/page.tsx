@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
 type Mode = 'login' | 'signup' | 'otp'
@@ -26,6 +26,22 @@ function checkStrength(password: string): PasswordStrength {
   return { score, label: labels[score], color: colors[score], errors }
 }
 
+function CheckIcon({ met }: { met: boolean }) {
+  return (
+    <span
+      className={`flex items-center justify-center w-4 h-4 rounded border shrink-0 ${
+        met ? 'bg-[#16a34a] border-[#16a34a]' : 'bg-white border-[#e5e7eb]'
+      }`}
+    >
+      {met && (
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8.5L6.5 12L13 4.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )}
+    </span>
+  )
+}
+
 export default function AuthPage() {
   const router = useRouter()
   const [mode, setMode] = useState<Mode>('login')
@@ -37,13 +53,17 @@ export default function AuthPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [devOTP, setDevOTP] = useState('')
-  const [strength, setStrength] = useState<PasswordStrength | null>(null)
   const otpRefs = useRef<(HTMLInputElement | null)[]>([])
 
-  useEffect(() => {
-    if (password && mode === 'signup') setStrength(checkStrength(password))
-    else setStrength(null)
-  }, [password, mode])
+  const strength = password && mode === 'signup' ? checkStrength(password) : null
+
+  const requirements = [
+    { label: 'At least 8 characters', met: password.length >= 8 },
+    { label: 'One uppercase letter', met: /[A-Z]/.test(password) },
+    { label: 'One lowercase letter', met: /[a-z]/.test(password) },
+    { label: 'One number', met: /[0-9]/.test(password) },
+    { label: 'One special character', met: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password) },
+  ]
 
   const clearMessages = () => { setError(''); setSuccess('') }
 
@@ -130,30 +150,27 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 flex items-center justify-center p-4">
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full opacity-10 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full opacity-10 blur-3xl" />
-      </div>
-
-      <div className="relative w-full max-w-md">
-        <div className="bg-slate-800/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
-
-          <div className="flex justify-center mb-6">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-xl font-bold shadow-lg">
-              A
-            </div>
+    <div className="min-h-screen bg-[#f9fafb] flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="flex flex-col items-center mb-6">
+          <div className="w-11 h-11 rounded-lg bg-[#111827] flex items-center justify-center text-white text-sm font-semibold">
+            PM
           </div>
+          <h1 className="mt-3 text-lg font-semibold text-[#111827]">PM Platform</h1>
+          <p className="text-[13px] text-[#6b7280]">Enterprise project management, simplified</p>
+        </div>
+
+        <div className="bg-white border border-[#e5e7eb] rounded-xl shadow-sm p-8">
 
           {mode !== 'otp' && (
-            <div className="flex bg-slate-900/50 rounded-xl p-1 mb-8 border border-slate-700/30">
+            <div className="flex bg-[#f3f4f6] rounded-lg p-1 mb-7">
               {(['login', 'signup'] as const).map((m) => (
                 <button key={m}
-                  onClick={() => { setMode(m); clearMessages(); setPassword(''); setStrength(null) }}
-                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  onClick={() => { setMode(m); clearMessages(); setPassword('') }}
+                  className={`flex-1 py-2 rounded-md text-[13px] font-medium transition-colors ${
                     mode === m
-                      ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'bg-white text-[#111827] shadow-sm border border-[#e5e7eb]'
+                      : 'text-[#6b7280] hover:text-[#111827]'
                   }`}
                 >
                   {m === 'login' ? 'Sign in' : 'Create account'}
@@ -163,15 +180,15 @@ export default function AuthPage() {
           )}
 
           {mode === 'otp' && (
-            <div className="text-center mb-8">
-              <h2 className="text-xl font-semibold text-white mb-1">Verify your email</h2>
-              <p className="text-slate-400 text-sm">
+            <div className="text-center mb-7">
+              <h2 className="text-lg font-semibold text-[#111827] mb-1">Verify your email</h2>
+              <p className="text-[#6b7280] text-[13px]">
                 Enter the 6-digit code sent to<br />
-                <span className="text-purple-400 font-medium">{email}</span>
+                <span className="text-[#111827] font-medium">{email}</span>
               </p>
               {devOTP && (
-                <div className="mt-3 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-                  <p className="text-amber-400 text-xs">
+                <div className="mt-3 px-4 py-2 bg-[#fefce8] border border-[#fde68a] rounded-lg">
+                  <p className="text-[#92400e] text-xs">
                     Dev mode OTP: <span className="font-mono font-bold text-sm">{devOTP}</span>
                   </p>
                 </div>
@@ -180,60 +197,63 @@ export default function AuthPage() {
           )}
 
           {error && (
-            <div className="mb-4 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl">
-              <p className="text-red-400 text-sm">{error}</p>
+            <div className="mb-4 px-4 py-3 bg-[#fef2f2] border border-[#fecaca] rounded-lg">
+              <p className="text-[#b91c1c] text-[13px]">{error}</p>
             </div>
           )}
           {success && (
-            <div className="mb-4 px-4 py-3 bg-green-500/10 border border-green-500/30 rounded-xl">
-              <p className="text-green-400 text-sm">{success}</p>
+            <div className="mb-4 px-4 py-3 bg-[#f0fdf4] border border-[#bbf7d0] rounded-lg">
+              <p className="text-[#15803d] text-[13px]">{success}</p>
             </div>
           )}
 
           {mode !== 'otp' && (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-slate-400 mb-1.5">Email</label>
+                <label className="block text-[13px] font-medium text-[#111827] mb-1.5">Email</label>
                 <input type="email" value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && (mode === 'login' ? handleLogin() : handleSignup())}
-                  placeholder="you@example.com"
-                  className="w-full px-4 py-3 bg-slate-900/60 border border-slate-700/50 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-purple-500/70 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                  placeholder="you@company.com"
+                  className="w-full px-3 py-2.5 bg-white border border-[#e5e7eb] rounded-lg text-[#111827] placeholder-[#9ca3af] text-[13px] focus:outline-none focus:border-[#111827] transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-slate-400 mb-1.5">Password</label>
+                <label className="block text-[13px] font-medium text-[#111827] mb-1.5">Password</label>
                 <div className="relative">
                   <input type={showPassword ? 'text' : 'password'} value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && (mode === 'login' ? handleLogin() : handleSignup())}
-                    placeholder={mode === 'signup' ? 'Min 8 chars, mixed case + symbol' : 'Your password'}
-                    className="w-full px-4 py-3 pr-11 bg-slate-900/60 border border-slate-700/50 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-purple-500/70 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                    placeholder={mode === 'signup' ? 'Create a strong password' : 'Your password'}
+                    className="w-full px-3 py-2.5 pr-14 bg-white border border-[#e5e7eb] rounded-lg text-[#111827] placeholder-[#9ca3af] text-[13px] focus:outline-none focus:border-[#111827] transition-colors"
                   />
                   <button type="button" onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-xs">
-                    {showPassword ? '🙈' : '👁️'}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280] hover:text-[#111827] text-xs font-medium">
+                    {showPassword ? 'Hide' : 'Show'}
                   </button>
                 </div>
 
-                {mode === 'signup' && strength && password.length > 0 && (
-                  <div className="mt-2">
-                    <div className="flex gap-1 mb-1">
-                      {[0, 1, 2, 3, 4].map((i) => (
-                        <div key={i} className="h-1 flex-1 rounded-full transition-all duration-300"
-                          style={{ backgroundColor: i <= strength.score ? strength.color : '#334155' }} />
-                      ))}
-                    </div>
-                    <p className="text-xs" style={{ color: strength.color }}>{strength.label}</p>
-                    {strength.errors.length > 0 && (
-                      <ul className="mt-1 space-y-0.5">
-                        {strength.errors.map((err) => (
-                          <li key={err} className="text-xs text-slate-500 flex items-center gap-1">
-                            <span className="text-red-400">×</span> {err}
-                          </li>
-                        ))}
-                      </ul>
+                {mode === 'signup' && password.length > 0 && (
+                  <div className="mt-3 space-y-1.5">
+                    {requirements.map((r) => (
+                      <div key={r.label} className="flex items-center gap-2">
+                        <CheckIcon met={r.met} />
+                        <span className={`text-xs ${r.met ? 'text-[#111827]' : 'text-[#9ca3af]'}`}>
+                          {r.label}
+                        </span>
+                      </div>
+                    ))}
+                    {strength && (
+                      <div className="flex items-center gap-2 pt-1">
+                        <div className="flex gap-1 flex-1">
+                          {[0, 1, 2, 3, 4].map((i) => (
+                            <div key={i} className="h-1 flex-1 rounded-full transition-all duration-300"
+                              style={{ backgroundColor: i <= strength.score ? strength.color : '#e5e7eb' }} />
+                          ))}
+                        </div>
+                        <span className="text-xs font-medium" style={{ color: strength.color }}>{strength.label}</span>
+                      </div>
                     )}
                   </div>
                 )}
@@ -241,7 +261,7 @@ export default function AuthPage() {
 
               <button onClick={mode === 'login' ? handleLogin : handleSignup}
                 disabled={loading}
-                className="w-full py-3 mt-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-all duration-200 text-sm shadow-lg shadow-purple-900/30 active:scale-[0.98]">
+                className="w-full py-2.5 mt-2 bg-[#111827] hover:bg-[#1f2937] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors text-[13px]">
                 {loading ? 'Please wait...' : mode === 'login' ? 'Sign in' : 'Create account & get OTP'}
               </button>
             </div>
@@ -255,28 +275,28 @@ export default function AuthPage() {
                     type="text" inputMode="numeric" maxLength={1} value={digit}
                     onChange={(e) => handleOTPInput(i, e.target.value)}
                     onKeyDown={(e) => handleOTPKeyDown(i, e)}
-                    className={`w-12 h-14 text-center text-xl font-semibold bg-slate-900/60 border rounded-xl text-white transition-all focus:outline-none ${
-                      digit ? 'border-purple-500/70 ring-2 ring-purple-500/20' : 'border-slate-700/50 focus:border-purple-500/70 focus:ring-2 focus:ring-purple-500/20'
+                    className={`w-11 h-13 py-2.5 text-center text-lg font-semibold bg-white border rounded-lg text-[#111827] transition-colors focus:outline-none ${
+                      digit ? 'border-[#111827]' : 'border-[#e5e7eb] focus:border-[#111827]'
                     }`}
                   />
                 ))}
               </div>
               <button onClick={handleVerifyOTP}
                 disabled={loading || otp.join('').length < 6}
-                className="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-all duration-200 text-sm shadow-lg shadow-purple-900/30 active:scale-[0.98]">
+                className="w-full py-2.5 bg-[#111827] hover:bg-[#1f2937] disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors text-[13px]">
                 {loading ? 'Verifying...' : 'Verify OTP'}
               </button>
               <button onClick={() => { setMode('login'); clearMessages(); setOtp(['','','','','','']) }}
-                className="w-full mt-3 py-2 text-slate-400 hover:text-slate-200 text-sm transition-colors">
-                ← Back to login
+                className="w-full mt-3 py-2 text-[#6b7280] hover:text-[#111827] text-[13px] transition-colors">
+                Back to login
               </button>
             </div>
           )}
-
-          <p className="mt-6 text-center text-slate-600 text-xs">
-            🍪 Secure HTTP-only cookie session
-          </p>
         </div>
+
+        <p className="mt-6 text-center text-[#9ca3af] text-xs">
+          Secured with HTTP-only session cookies
+        </p>
       </div>
     </div>
   )
