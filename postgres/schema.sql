@@ -905,7 +905,7 @@ CREATE TABLE notification_preferences (
 -- =============================================================================
 
 CREATE TABLE analytics_events (
-    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id              UUID NOT NULL DEFAULT uuid_generate_v4(),
     org_id          UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     project_id      UUID REFERENCES projects(id) ON DELETE CASCADE,
     user_id         UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -913,7 +913,8 @@ CREATE TABLE analytics_events (
     event_name      VARCHAR(100) NOT NULL,
     properties      JSONB NOT NULL DEFAULT '{}',
     context         JSONB NOT NULL DEFAULT '{}',
-    occurred_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    occurred_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (id, occurred_at)
 ) PARTITION BY RANGE (occurred_at);
 
 CREATE TABLE analytics_events_2026
@@ -961,7 +962,7 @@ CREATE TABLE reports (
 -- =============================================================================
 
 CREATE TABLE audit_logs (
-    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id              UUID NOT NULL DEFAULT uuid_generate_v4(),
     org_id          UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     project_id      UUID REFERENCES projects(id) ON DELETE SET NULL,
     actor_type      VARCHAR(20) NOT NULL DEFAULT 'user'
@@ -979,7 +980,8 @@ CREATE TABLE audit_logs (
     otel_trace_id   VARCHAR(64),
     severity        VARCHAR(10) NOT NULL DEFAULT 'info'
                     CHECK (severity IN ('debug','info','warning','error','critical')),
-    occurred_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    occurred_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (id, occurred_at)
 ) PARTITION BY RANGE (occurred_at);
 
 CREATE TABLE audit_logs_2026
@@ -1042,7 +1044,7 @@ CREATE TABLE system_health_checks (
 );
 
 CREATE TABLE telemetry_metrics (
-    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id              UUID NOT NULL DEFAULT uuid_generate_v4(),
     org_id          UUID REFERENCES organizations(id) ON DELETE CASCADE,
     project_id      UUID REFERENCES projects(id) ON DELETE CASCADE,
     deployment_id   UUID REFERENCES deployments(id) ON DELETE CASCADE,
@@ -1050,7 +1052,8 @@ CREATE TABLE telemetry_metrics (
     metric_value    NUMERIC(18,6) NOT NULL,
     unit            VARCHAR(30),
     tags            JSONB NOT NULL DEFAULT '{}',
-    recorded_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    recorded_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (id, recorded_at)
 ) PARTITION BY RANGE (recorded_at);
 
 CREATE TABLE telemetry_metrics_2026
@@ -1193,7 +1196,7 @@ CREATE TABLE team_sentiment_readings (
 
 -- Activity / Event Log
 CREATE TABLE activity_logs (
-    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id              UUID NOT NULL DEFAULT uuid_generate_v4(),
     org_id          UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     project_id      UUID REFERENCES projects(id) ON DELETE SET NULL,
     actor_type      VARCHAR(20) NOT NULL DEFAULT 'user',
@@ -1202,7 +1205,8 @@ CREATE TABLE activity_logs (
     entity_id       UUID NOT NULL,
     action          VARCHAR(80) NOT NULL,
     delta           JSONB,
-    occurred_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    occurred_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (id, occurred_at)
 ) PARTITION BY RANGE (occurred_at);
 
 CREATE TABLE activity_logs_2026

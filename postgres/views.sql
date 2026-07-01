@@ -169,9 +169,13 @@ LEFT JOIN tasks t ON t.project_id = p.id
 LEFT JOIN project_members pm ON pm.project_id = p.id
 LEFT JOIN LATERAL (
     SELECT ROUND(AVG(completed_points), 2) AS avg_vel
-    FROM sprint_velocity_history
-    WHERE project_id = p.id
-    ORDER BY period_start DESC LIMIT 5
+    FROM (
+        SELECT completed_points
+        FROM sprint_velocity_history
+        WHERE project_id = p.id
+        ORDER BY period_start DESC
+        LIMIT 5
+    ) recent
 ) svh ON TRUE
 WHERE p.status != 'archived'
 GROUP BY p.id, svh.avg_vel
