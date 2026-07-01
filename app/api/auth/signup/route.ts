@@ -3,6 +3,9 @@ import bcrypt from 'bcryptjs'
 import { v4 as uuidv4 } from 'uuid'
 import { users, otpStore } from '@/lib/store'
 import { checkPasswordStrength, generateOTP } from '@/lib/auth'
+import { sendOTPEmail } from '@/lib/mail'
+
+const ALLOWED_EMAIL_DOMAIN = 'eccoucil.org'
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,6 +19,10 @@ export async function POST(req: NextRequest) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
       return NextResponse.json({ error: 'Invalid email format' }, { status: 400 })
+    }
+
+    if (!email.toLowerCase().endsWith(`@${ALLOWED_EMAIL_DOMAIN}`)) {
+      return NextResponse.json({ error: `Only @${ALLOWED_EMAIL_DOMAIN} email addresses can sign up` }, { status: 403 })
     }
 
     if (users.has(email.toLowerCase())) {
@@ -53,14 +60,12 @@ export async function POST(req: NextRequest) {
       attempts: 0,
     })
 
-    // In production: send email via nodemailer/sendgrid
-    // For dev: return OTP in response so you can test
-    console.log(`\n📧 OTP for ${email}: ${otp}\n`)
+    const emailSent = await sendOTPEmail(email.toLowerCase(), otp)
 
     return NextResponse.json({
       message: 'Account created. Check your email for the OTP.',
-      // Remove this in production!
-      devOTP: process.env.NODE_ENV !== 'production' ? otp : undefined,
+      // Only exposed when SMTP isn't configured yet, so local/dev testing still works.
+      devOTP: !emailSent && process.env.NODE_ENV !== 'production' ? otp : undefined,
     }, { status: 201 })
 
   } catch (error) {
