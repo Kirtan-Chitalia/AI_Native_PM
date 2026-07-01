@@ -33,81 +33,95 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#f9fafb] flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-[#111827] border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 flex items-center justify-center p-4">
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full opacity-10 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full opacity-10 blur-3xl" />
-      </div>
-
-      <div className="relative w-full max-w-md">
-        <div className="bg-slate-800/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
-
-          {/* Avatar */}
-          <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-2xl font-bold shadow-lg mb-4">
-              {user?.email?.[0]?.toUpperCase()}
+    <div className="min-h-screen bg-[#f9fafb]">
+      <header className="bg-white border-b border-[#e5e7eb]">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-[#111827] flex items-center justify-center text-white text-xs font-semibold">
+              PM
             </div>
-            <h1 className="text-xl font-semibold text-white">Welcome back!</h1>
-            <p className="text-slate-400 text-sm mt-1">{user?.email}</p>
-            <span className="mt-2 px-3 py-1 bg-green-500/10 border border-green-500/30 text-green-400 text-xs rounded-full">
-              ✓ Verified
-            </span>
+            <span className="text-sm font-semibold text-[#111827]">PM Platform</span>
           </div>
-
-          {/* Info cards */}
-          <div className="space-y-3 mb-8">
-            <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
-              <p className="text-slate-500 text-xs mb-1">User ID</p>
-              <p className="text-slate-300 text-sm font-mono truncate">{user?.id}</p>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full bg-[#111827] flex items-center justify-center text-white text-xs font-medium">
+                {user?.email?.[0]?.toUpperCase()}
+              </div>
+              <span className="text-[13px] text-[#111827]">{user?.email}</span>
             </div>
-            <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
-              <p className="text-slate-500 text-xs mb-1">Account created</p>
-              <p className="text-slate-300 text-sm">
-                {user?.createdAt ? new Date(user.createdAt).toLocaleString() : '—'}
-              </p>
-            </div>
+            <button onClick={handleLogout}
+              className="px-3 py-1.5 border border-[#e5e7eb] text-[#6b7280] hover:text-[#111827] hover:border-[#111827] text-[13px] font-medium rounded-lg transition-colors">
+              Sign out
+            </button>
+          </div>
+        </div>
+      </header>
 
-            {/* Cookie info */}
-            <div className="bg-purple-500/5 rounded-xl p-4 border border-purple-500/20">
-              <p className="text-purple-400 text-xs font-medium mb-2">🍪 HTTP Cookie Session</p>
-              <div className="space-y-1 text-xs text-slate-400">
-                <div className="flex justify-between">
-                  <span>Name</span>
-                  <span className="font-mono text-slate-300">auth_token</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>HttpOnly</span>
-                  <span className="text-green-400">✓ true</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>SameSite</span>
-                  <span className="text-green-400">Lax (CSRF safe)</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Secure</span>
-                  <span className="text-amber-400">production only</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Expiry</span>
-                  <span className="text-slate-300">7 days</span>
-                </div>
+      <main className="max-w-5xl mx-auto px-6 py-10">
+        <div className="flex items-center gap-3 mb-8">
+          <h1 className="text-xl font-semibold text-[#111827]">Welcome back</h1>
+          {user?.verified && (
+            <span className="px-2.5 py-1 bg-[#f0fdf4] border border-[#bbf7d0] text-[#15803d] text-xs font-medium rounded-full">
+              Verified
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white border border-[#e5e7eb] rounded-xl shadow-sm p-6">
+            <h2 className="text-sm font-semibold text-[#111827] mb-4">Account</h2>
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs text-[#9ca3af] mb-1">Email</p>
+                <p className="text-[13px] text-[#111827]">{user?.email}</p>
+              </div>
+              <div>
+                <p className="text-xs text-[#9ca3af] mb-1">User ID</p>
+                <p className="text-[13px] text-[#111827] font-mono truncate">{user?.id}</p>
+              </div>
+              <div>
+                <p className="text-xs text-[#9ca3af] mb-1">Account created</p>
+                <p className="text-[13px] text-[#111827]">
+                  {user?.createdAt ? new Date(user.createdAt).toLocaleString() : '—'}
+                </p>
               </div>
             </div>
           </div>
 
-          <button onClick={handleLogout}
-            className="w-full py-3 bg-slate-700/50 hover:bg-red-500/20 border border-slate-600/50 hover:border-red-500/40 text-slate-300 hover:text-red-400 font-medium rounded-xl transition-all duration-200 text-sm">
-            Sign out
-          </button>
+          <div className="bg-white border border-[#e5e7eb] rounded-xl shadow-sm p-6">
+            <h2 className="text-sm font-semibold text-[#111827] mb-4">Session</h2>
+            <div className="space-y-2.5">
+              <div className="flex justify-between text-[13px]">
+                <span className="text-[#6b7280]">Cookie name</span>
+                <span className="font-mono text-[#111827]">auth_token</span>
+              </div>
+              <div className="flex justify-between text-[13px]">
+                <span className="text-[#6b7280]">HttpOnly</span>
+                <span className="text-[#15803d] font-medium">true</span>
+              </div>
+              <div className="flex justify-between text-[13px]">
+                <span className="text-[#6b7280]">SameSite</span>
+                <span className="text-[#111827]">Lax</span>
+              </div>
+              <div className="flex justify-between text-[13px]">
+                <span className="text-[#6b7280]">Secure</span>
+                <span className="text-[#111827]">production only</span>
+              </div>
+              <div className="flex justify-between text-[13px]">
+                <span className="text-[#6b7280]">Expiry</span>
+                <span className="text-[#111827]">7 days</span>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   )
 }
