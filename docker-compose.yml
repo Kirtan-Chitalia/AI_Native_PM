@@ -25,25 +25,5 @@ services:
       retries: 5
       start_period: 10s
 
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: pm_app
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-pmadmin}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/${POSTGRES_DB:-pmplatform}
-      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production}
-      SMTP_HOST: ${SMTP_HOST:-}
-      SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_USER: ${SMTP_USER:-}
-      SMTP_PASS: ${SMTP_PASS:-}
-      SMTP_FROM: ${SMTP_FROM:-}
-    ports:
-      - "3000:3000"
-
 volumes:
   postgres_data:
