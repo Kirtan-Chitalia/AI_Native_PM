@@ -1,6 +1,10 @@
 import { Pool } from 'pg'
 import { getAuthToken, verifyToken } from '@/lib/auth'
 
+console.log("DATABASE_URL =", process.env.DATABASE_URL)
+console.log("POSTGRES_USER =", process.env.POSTGRES_USER)
+console.log("POSTGRES_PASSWORD =", process.env.POSTGRES_PASSWORD)
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 })
@@ -28,10 +32,19 @@ export async function ensureUserAndOrg(userId: string, email: string) {
     [DEFAULT_ORG_ID]
   )
   await query(
-    `INSERT INTO users (id, org_id, email, email_verified, display_name)
-     VALUES ($1, $2, $3, TRUE, $4)
-     ON CONFLICT (id) DO NOTHING`,
-    [userId, DEFAULT_ORG_ID, email, email.split('@')[0]]
+  `INSERT INTO users (
+      id,
+      org_id,
+      email,
+      email_verified,
+      display_name
+  )
+  VALUES ($1,$2,$3,TRUE,$4)
+  ON CONFLICT (org_id,email)
+  DO UPDATE SET
+      id = EXCLUDED.id,
+      display_name = EXCLUDED.display_name`,
+  [userId, DEFAULT_ORG_ID, email, email.split('@')[0]]
   )
 }
 

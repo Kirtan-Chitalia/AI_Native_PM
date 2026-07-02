@@ -5,7 +5,7 @@ import { users, otpStore } from '@/lib/store'
 import { checkPasswordStrength, generateOTP } from '@/lib/auth'
 import { sendOTPEmail } from '@/lib/mail'
 
-const ALLOWED_EMAIL_DOMAIN = 'eccoucil.org'
+const ALLOWED_EMAIL_DOMAIN = 'eccouncil.org'
 
 export async function POST(req: NextRequest) {
   try {
