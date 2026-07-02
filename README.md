@@ -1,4 +1,4 @@
-# PM Platform
+# Tasklynx
 
 A minimal project management app: email/OTP auth, projects, tasks, and project members. Built with Next.js 16 (App Router), TypeScript, Tailwind CSS, and PostgreSQL (via the `pg` pool — no ORM).
 

@@ -10,7 +10,7 @@ function CheckIcon({ met }: { met: boolean }) {
   return (
     <span
       className={`flex items-center justify-center w-4 h-4 rounded border shrink-0 ${
-        met ? 'bg-[#16a34a] border-[#16a34a]' : 'bg-white border-[#e5e7eb]'
+        met ? 'bg-[#16a34a] border-[#16a34a]' : 'bg-white border-[#E5E7EB] dark:border-[#2A2A2A]'
       }`}
     >
       {met && (
@@ -130,27 +130,27 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f9fafb] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#F8F8F8] dark:bg-[#0A0A0A] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center mb-6">
-          <div className="w-11 h-11 rounded-lg bg-[#111827] flex items-center justify-center text-white text-sm font-semibold">
-            PM
+          <div className="w-11 h-11 rounded-lg bg-[#E5002B] flex items-center justify-center text-white text-sm font-semibold">
+            TL
           </div>
-          <h1 className="mt-3 text-lg font-semibold text-[#111827]">PM Platform</h1>
-          <p className="text-[13px] text-[#6b7280]">Enterprise project management, simplified</p>
+          <h1 className="mt-3 text-lg font-semibold text-[#0A0A0A] dark:text-white">Tasklynx</h1>
+          <p className="text-[13px] text-[#6B7280] dark:text-[#9CA3AF]">Enterprise project management, simplified</p>
         </div>
 
-        <div className="bg-white border border-[#e5e7eb] rounded-xl shadow-sm p-8">
+        <div className="bg-white dark:bg-[#1A1A1A] border border-[#E5E7EB] dark:border-[#2A2A2A] rounded-xl shadow-sm p-8">
 
           {mode !== 'otp' && (
-            <div className="flex bg-[#f3f4f6] rounded-lg p-1 mb-7">
+            <div className="flex bg-[#F3F4F6] dark:bg-[#242424] rounded-lg p-1 mb-7">
               {(['login', 'signup'] as const).map((m) => (
                 <button key={m}
                   onClick={() => { setMode(m); clearMessages(); setPassword('') }}
                   className={`flex-1 py-2 rounded-md text-[13px] font-medium transition-colors ${
                     mode === m
-                      ? 'bg-white text-[#111827] shadow-sm border border-[#e5e7eb]'
-                      : 'text-[#6b7280] hover:text-[#111827]'
+                      ? 'bg-white dark:bg-[#1A1A1A] text-[#0A0A0A] dark:text-white shadow-sm border border-[#E5E7EB] dark:border-[#2A2A2A]'
+                      : 'text-[#6B7280] dark:text-[#9CA3AF] hover:text-[#0A0A0A] dark:hover:text-white'
                   }`}
                 >
                   {m === 'login' ? 'Sign in' : 'Create account'}
@@ -161,10 +161,10 @@ export default function AuthPage() {
 
           {mode === 'otp' && (
             <div className="text-center mb-7">
-              <h2 className="text-lg font-semibold text-[#111827] mb-1">Verify your email</h2>
-              <p className="text-[#6b7280] text-[13px]">
+              <h2 className="text-lg font-semibold text-[#0A0A0A] dark:text-white mb-1">Verify your email</h2>
+              <p className="text-[#6B7280] dark:text-[#9CA3AF] text-[13px]">
                 Enter the 6-digit code sent to<br />
-                <span className="text-[#111827] font-medium">{email}</span>
+                <span className="text-[#0A0A0A] dark:text-white font-medium">{email}</span>
               </p>
               {devOTP && (
                 <div className="mt-3 px-4 py-2 bg-[#fefce8] border border-[#fde68a] rounded-lg">
@@ -190,26 +190,26 @@ export default function AuthPage() {
           {mode !== 'otp' && (
             <div className="space-y-4">
               <div>
-                <label className="block text-[13px] font-medium text-[#111827] mb-1.5">Email</label>
+                <label className="block text-[13px] font-medium text-[#0A0A0A] dark:text-white mb-1.5">Email</label>
                 <input type="email" value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && (mode === 'login' ? handleLogin() : handleSignup())}
                   placeholder="you@company.com"
-                  className="w-full px-3 py-2.5 bg-white border border-[#e5e7eb] rounded-lg text-[#111827] placeholder-[#9ca3af] text-[13px] focus:outline-none focus:border-[#111827] transition-colors"
+                  className="w-full px-3 py-2.5 bg-white dark:bg-[#141414] border border-[#E5E7EB] dark:border-[#2A2A2A] rounded-lg text-[#0A0A0A] dark:text-white placeholder-[#9CA3AF] text-[13px] focus:outline-none focus:border-[#E5002B] transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-[13px] font-medium text-[#111827] mb-1.5">Password</label>
+                <label className="block text-[13px] font-medium text-[#0A0A0A] dark:text-white mb-1.5">Password</label>
                 <div className="relative">
                   <input type={showPassword ? 'text' : 'password'} value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && (mode === 'login' ? handleLogin() : handleSignup())}
                     placeholder={mode === 'signup' ? 'Create a strong password' : 'Your password'}
-                    className="w-full px-3 py-2.5 pr-14 bg-white border border-[#e5e7eb] rounded-lg text-[#111827] placeholder-[#9ca3af] text-[13px] focus:outline-none focus:border-[#111827] transition-colors"
+                    className="w-full px-3 py-2.5 pr-14 bg-white dark:bg-[#141414] border border-[#E5E7EB] dark:border-[#2A2A2A] rounded-lg text-[#0A0A0A] dark:text-white placeholder-[#9CA3AF] text-[13px] focus:outline-none focus:border-[#E5002B] transition-colors"
                   />
                   <button type="button" onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b7280] hover:text-[#111827] text-xs font-medium">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] dark:text-[#9CA3AF] hover:text-[#0A0A0A] dark:hover:text-white text-xs font-medium">
                     {showPassword ? 'Hide' : 'Show'}
                   </button>
                 </div>
@@ -219,7 +219,7 @@ export default function AuthPage() {
                     {requirements.map((r) => (
                       <div key={r.label} className="flex items-center gap-2">
                         <CheckIcon met={r.met} />
-                        <span className={`text-xs ${r.met ? 'text-[#111827]' : 'text-[#9ca3af]'}`}>
+                        <span className={`text-xs ${r.met ? 'text-[#0A0A0A] dark:text-white' : 'text-[#9CA3AF]'}`}>
                           {r.label}
                         </span>
                       </div>
@@ -241,7 +241,7 @@ export default function AuthPage() {
 
               <button onClick={mode === 'login' ? handleLogin : handleSignup}
                 disabled={loading}
-                className="w-full py-2.5 mt-2 bg-[#111827] hover:bg-[#1f2937] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors text-[13px]">
+                className="w-full py-2.5 mt-2 bg-[#E5002B] hover:bg-[#CC0025] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors text-[13px]">
                 {loading ? 'Please wait...' : mode === 'login' ? 'Sign in' : 'Create account & get OTP'}
               </button>
             </div>
@@ -255,26 +255,26 @@ export default function AuthPage() {
                     type="text" inputMode="numeric" maxLength={1} value={digit}
                     onChange={(e) => handleOTPInput(i, e.target.value)}
                     onKeyDown={(e) => handleOTPKeyDown(i, e)}
-                    className={`w-11 h-13 py-2.5 text-center text-lg font-semibold bg-white border rounded-lg text-[#111827] transition-colors focus:outline-none ${
-                      digit ? 'border-[#111827]' : 'border-[#e5e7eb] focus:border-[#111827]'
+                    className={`w-11 h-13 py-2.5 text-center text-lg font-semibold bg-white dark:bg-[#141414] border rounded-lg text-[#0A0A0A] dark:text-white transition-colors focus:outline-none ${
+                      digit ? 'border-[#E5002B]' : 'border-[#E5E7EB] dark:border-[#2A2A2A] focus:border-[#E5002B]'
                     }`}
                   />
                 ))}
               </div>
               <button onClick={handleVerifyOTP}
                 disabled={loading || otp.join('').length < 6}
-                className="w-full py-2.5 bg-[#111827] hover:bg-[#1f2937] disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors text-[13px]">
+                className="w-full py-2.5 bg-[#E5002B] hover:bg-[#CC0025] disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors text-[13px]">
                 {loading ? 'Verifying...' : 'Verify OTP'}
               </button>
               <button onClick={() => { setMode('login'); clearMessages(); setOtp(['','','','','','']) }}
-                className="w-full mt-3 py-2 text-[#6b7280] hover:text-[#111827] text-[13px] transition-colors">
+                className="w-full mt-3 py-2 text-[#6B7280] dark:text-[#9CA3AF] hover:text-[#0A0A0A] dark:hover:text-white text-[13px] transition-colors">
                 Back to login
               </button>
             </div>
           )}
         </div>
 
-        <p className="mt-6 text-center text-[#9ca3af] text-xs">
+        <p className="mt-6 text-center text-[#9CA3AF] text-xs">
           Secured with HTTP-only session cookies
         </p>
       </div>
