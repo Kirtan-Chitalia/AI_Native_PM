@@ -6,7 +6,7 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const tasks = await query(
-    `SELECT t.id, t.title, t.status, t.priority, t.due_date, t.project_id,
+    `SELECT t.id, t.title, t.status, t.priority, t.story_points, t.due_date, t.project_id,
             p.name AS project_name
      FROM tasks t
      JOIN projects p ON p.id = t.project_id
