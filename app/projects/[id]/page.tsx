@@ -522,7 +522,7 @@ export default function ProjectDetailPage() {
                 <label className="block text-[13px] font-medium text-[#111827] mb-1.5">Email</label>
                 <input value={memberEmail} onChange={(e) => setMemberEmail(e.target.value)} placeholder="teammate@company.com"
                   className="w-full px-3 py-2.5 bg-white border border-[#e5e7eb] rounded-lg text-[#111827] placeholder-[#9ca3af] text-[13px] focus:outline-none focus:border-[#111827]" />
-                <p className="text-xs text-[#9ca3af] mt-1">They must have already signed in to PM Platform once.</p>
+                <p className="text-xs text-[#9ca3af] mt-1">They must have already signed in to Tasklynx once.</p>
               </div>
               <div>
                 <label className="block text-[13px] font-medium text-[#111827] mb-1.5">Role</label>

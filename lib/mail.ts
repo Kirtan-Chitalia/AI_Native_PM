@@ -26,7 +26,7 @@ export async function sendOTPEmail(to: string, otp: string): Promise<boolean> {
   await t.sendMail({
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to,
-    subject: 'Your PM Platform verification code',
+    subject: 'Your Tasklynx verification code',
     text: `Your verification code is ${otp}. It expires in 10 minutes.`,
     html: `<p>Your verification code is <strong>${otp}</strong>. It expires in 10 minutes.</p>`,
   })

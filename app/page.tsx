@@ -134,9 +134,9 @@ export default function AuthPage() {
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center mb-6">
           <div className="w-11 h-11 rounded-lg bg-[#111827] flex items-center justify-center text-white text-sm font-semibold">
-            PM
+            TL
           </div>
-          <h1 className="mt-3 text-lg font-semibold text-[#111827]">PM Platform</h1>
+          <h1 className="mt-3 text-lg font-semibold text-[#111827]">Tasklynx</h1>
           <p className="text-[13px] text-[#6b7280]">Enterprise project management, simplified</p>
         </div>
 

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'PM Platform',
+  title: 'Tasklynx',
   description: 'Projects and tasks, kept simple',
 }
 

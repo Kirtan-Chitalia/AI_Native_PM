@@ -15,9 +15,9 @@ export default function AppHeader({ email, active, onLogout }: AppHeaderProps) {
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-[#111827] flex items-center justify-center text-white text-xs font-semibold">
-              PM
+              TL
             </div>
-            <span className="text-sm font-semibold text-[#111827]">PM Platform</span>
+            <span className="text-sm font-semibold text-[#111827]">Tasklynx</span>
           </div>
           <nav className="flex items-center gap-5">
             <Link href="/dashboard"
