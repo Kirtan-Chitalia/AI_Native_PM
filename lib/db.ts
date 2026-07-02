@@ -1,10 +1,6 @@
 import { Pool } from 'pg'
 import { getAuthToken, verifyToken } from '@/lib/auth'
 
-console.log("DATABASE_URL =", process.env.DATABASE_URL)
-console.log("POSTGRES_USER =", process.env.POSTGRES_USER)
-console.log("POSTGRES_PASSWORD =", process.env.POSTGRES_PASSWORD)
-
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 })
@@ -31,20 +27,15 @@ export async function ensureUserAndOrg(userId: string, email: string) {
      ON CONFLICT (id) DO NOTHING`,
     [DEFAULT_ORG_ID]
   )
+  // Conflict target is (org_id, email), not id: the in-memory auth store can
+  // issue a fresh id for the same email after a server restart, and
+  // reassigning an existing user's id here would violate every FK that
+  // already points at their old projects/tasks/memberships.
   await query(
-  `INSERT INTO users (
-      id,
-      org_id,
-      email,
-      email_verified,
-      display_name
-  )
-  VALUES ($1,$2,$3,TRUE,$4)
-  ON CONFLICT (org_id,email)
-  DO UPDATE SET
-      id = EXCLUDED.id,
-      display_name = EXCLUDED.display_name`,
-  [userId, DEFAULT_ORG_ID, email, email.split('@')[0]]
+    `INSERT INTO users (id, org_id, email, email_verified, display_name)
+     VALUES ($1, $2, $3, TRUE, $4)
+     ON CONFLICT (org_id, email) DO UPDATE SET display_name = EXCLUDED.display_name`,
+    [userId, DEFAULT_ORG_ID, email, email.split('@')[0]]
   )
 }
 
