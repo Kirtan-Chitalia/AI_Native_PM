@@ -58,7 +58,7 @@ export default function Dashboard() {
         return r.json()
       })
       .then((data) => setUser(data.user))
-      .catch(() => router.push('/'))
+      .catch(() => router.push('/login'))
   }, [router])
 
   useEffect(() => {
@@ -75,7 +75,7 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' })
-    router.push('/')
+    router.push('/login')
   }
 
   const handleCreate = async () => {
