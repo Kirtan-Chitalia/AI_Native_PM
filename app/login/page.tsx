@@ -4,7 +4,7 @@ import { Suspense, useState, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { checkPasswordStrength } from '@/lib/password'
 
-type Mode = 'login' | 'signup' | 'otp'
+type Mode = 'login' | 'signup' | 'otp' | 'totp'
 
 function CheckIcon({ met }: { met: boolean }) {
   return (
@@ -38,11 +38,13 @@ function AuthPageInner() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
+  const [totpCode, setTotpCode] = useState(['', '', '', '', '', ''])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [devOTP, setDevOTP] = useState('')
   const otpRefs = useRef<(HTMLInputElement | null)[]>([])
+  const totpRefs = useRef<(HTMLInputElement | null)[]>([])
 
   const strength = password && mode === 'signup' ? checkPasswordStrength(password) : null
 
@@ -70,7 +72,43 @@ function AuthPageInner() {
           setSuccess('Email not verified. Check your inbox for OTP.')
           setTimeout(() => setMode('otp'), 1500)
         } else setError(data.error)
+      } else if (data.needsTotp) {
+        setTotpCode(['', '', '', '', '', ''])
+        setMode('totp')
       } else {
+        setSuccess('Login successful! Redirecting...')
+        setTimeout(() => router.push('/dashboard'), 1000)
+      }
+    } catch { setError('Network error. Please try again.') }
+    finally { setLoading(false) }
+  }
+
+  const handleTotpInput = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return
+    const next = [...totpCode]
+    next[index] = value.slice(-1)
+    setTotpCode(next)
+    if (value && index < 5) totpRefs.current[index + 1]?.focus()
+  }
+
+  const handleTotpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !totpCode[index] && index > 0)
+      totpRefs.current[index - 1]?.focus()
+  }
+
+  const handleVerifyTotp = async () => {
+    const value = totpCode.join('')
+    if (value.length < 6) { setError('Enter all 6 digits'); return }
+    clearMessages(); setLoading(true)
+    try {
+      const res = await fetch('/api/auth/totp/login-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: value }),
+      })
+      const data = await res.json()
+      if (!res.ok) setError(data.error)
+      else {
         setSuccess('Login successful! Redirecting...')
         setTimeout(() => router.push('/dashboard'), 1000)
       }
@@ -151,7 +189,7 @@ function AuthPageInner() {
 
         <div className="bg-white dark:bg-[#1A1A1A] border border-[#E5E7EB] dark:border-[#2A2A2A] rounded-xl shadow-sm p-8">
 
-          {mode !== 'otp' && (
+          {mode !== 'otp' && mode !== 'totp' && (
             <div className="flex bg-[#F3F4F6] dark:bg-[#242424] rounded-lg p-1 mb-7">
               {(['login', 'signup'] as const).map((m) => (
                 <button key={m}
@@ -165,6 +203,15 @@ function AuthPageInner() {
                   {m === 'login' ? 'Sign in' : 'Create account'}
                 </button>
               ))}
+            </div>
+          )}
+
+          {mode === 'totp' && (
+            <div className="text-center mb-7">
+              <h2 className="text-lg font-semibold text-[#0A0A0A] dark:text-white mb-1">Two-factor authentication</h2>
+              <p className="text-[#6B7280] dark:text-[#9CA3AF] text-[13px]">
+                Enter the 6-digit code from your authenticator app
+              </p>
             </div>
           )}
 
@@ -196,7 +243,7 @@ function AuthPageInner() {
             </div>
           )}
 
-          {mode !== 'otp' && (
+          {mode !== 'otp' && mode !== 'totp' && (
             <div className="space-y-4">
               <div>
                 <label className="block text-[13px] font-medium text-[#0A0A0A] dark:text-white mb-1.5">Email</label>
@@ -276,6 +323,32 @@ function AuthPageInner() {
                 {loading ? 'Verifying...' : 'Verify OTP'}
               </button>
               <button onClick={() => { setMode('login'); clearMessages(); setOtp(['','','','','','']) }}
+                className="w-full mt-3 py-2 text-[#6B7280] dark:text-[#9CA3AF] hover:text-[#0A0A0A] dark:hover:text-white text-[13px] transition-colors">
+                Back to login
+              </button>
+            </div>
+          )}
+
+          {mode === 'totp' && (
+            <div>
+              <div className="flex justify-center gap-3 mb-6">
+                {totpCode.map((digit, i) => (
+                  <input key={i} ref={(el) => { totpRefs.current[i] = el }}
+                    type="text" inputMode="numeric" maxLength={1} value={digit}
+                    onChange={(e) => handleTotpInput(i, e.target.value)}
+                    onKeyDown={(e) => handleTotpKeyDown(i, e)}
+                    className={`w-11 h-13 py-2.5 text-center text-lg font-semibold bg-white dark:bg-[#141414] border rounded-lg text-[#0A0A0A] dark:text-white transition-colors focus:outline-none ${
+                      digit ? 'border-[#E5002B]' : 'border-[#E5E7EB] dark:border-[#2A2A2A] focus:border-[#E5002B]'
+                    }`}
+                  />
+                ))}
+              </div>
+              <button onClick={handleVerifyTotp}
+                disabled={loading || totpCode.join('').length < 6}
+                className="w-full py-2.5 bg-[#E5002B] hover:bg-[#CC0025] disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors text-[13px]">
+                {loading ? 'Verifying...' : 'Verify code'}
+              </button>
+              <button onClick={() => { setMode('login'); clearMessages(); setTotpCode(['','','','','','']) }}
                 className="w-full mt-3 py-2 text-[#6B7280] dark:text-[#9CA3AF] hover:text-[#0A0A0A] dark:hover:text-white text-[13px] transition-colors">
                 Back to login
               </button>

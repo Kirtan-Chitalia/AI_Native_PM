@@ -39,7 +39,7 @@ const FEATURES = [
   },
   {
     title: 'Roles that actually mean something',
-    body: 'Owner, manager, contributor, reviewer, observer — each sees and can do exactly what their role allows, on every project, automatically.',
+    body: 'Admin, project manager, developer — each sees and can do exactly what their role allows, on every project, automatically.',
     demo: 'team',
   },
   {
