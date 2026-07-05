@@ -107,7 +107,7 @@ export default function ProjectDetailPage() {
     fetch('/api/auth/me')
       .then((r) => { if (!r.ok) throw new Error('Unauthorized'); return r.json() })
       .then((data) => setUser(data.user))
-      .catch(() => router.push('/'))
+      .catch(() => router.push('/login'))
   }, [router])
 
   useEffect(() => {
@@ -122,7 +122,7 @@ export default function ProjectDetailPage() {
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' })
-    router.push('/')
+    router.push('/login')
   }
 
   const handleSaveProject = async () => {

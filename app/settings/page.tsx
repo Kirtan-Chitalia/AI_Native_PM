@@ -20,7 +20,7 @@ export default function SettingsPage() {
 
   const loadUser = useCallback(async () => {
     const res = await fetch('/api/auth/me')
-    if (!res.ok) { router.push('/'); return }
+    if (!res.ok) { router.push('/login'); return }
     const data = await res.json()
     setUser(data.user)
     setLoading(false)
@@ -35,7 +35,7 @@ export default function SettingsPage() {
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' })
-    router.push('/')
+    router.push('/login')
   }
 
   const startSetup = async () => {
