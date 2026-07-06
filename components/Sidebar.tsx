@@ -5,13 +5,33 @@ import {
   DashboardIcon, ProjectsIcon, TasksIcon, TeamIcon, SettingsIcon, ChevronLeftIcon, CloseIcon,
 } from '@/components/icons'
 
-export type NavKey = 'dashboard' | 'projects' | 'my-tasks' | 'team' | 'settings'
+export type NavKey = 'dashboard' | 'projects' | 'my-tasks' | 'team' | 'settings' | 'users'
 
-const NAV_ITEMS: { key: NavKey; label: string; href: string; icon: (p: React.SVGProps<SVGSVGElement>) => React.ReactElement }[] = [
+const NAV_ITEMS_BASE: {
+  key: NavKey
+  label: string
+  href: string
+  adminOnly?: boolean
+  icon: (p: React.SVGProps<SVGSVGElement>) => React.ReactElement
+}[] = [
   { key: 'dashboard', label: 'Dashboard', href: '/dashboard', icon: DashboardIcon },
   { key: 'projects', label: 'Projects', href: '/projects', icon: ProjectsIcon },
   { key: 'my-tasks', label: 'My Tasks', href: '/dashboard', icon: TasksIcon },
-  { key: 'team', label: 'Team', href: '/projects', icon: TeamIcon },
+  { key: 'team', label: 'Team', href: '/team', icon: TeamIcon },
+  {
+    key: 'users',
+    label: 'Users',
+    href: '/settings/users',
+    adminOnly: true,
+    icon: (p) => (
+      <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    ),
+  },
   { key: 'settings', label: 'Settings', href: '/settings', icon: SettingsIcon },
 ]
 
@@ -27,10 +47,22 @@ interface SidebarProps {
   onToggleCollapsed: () => void
 }
 
-function NavList({ active, showLabels, onNavigate }: { active: NavKey; showLabels: boolean; onNavigate: () => void }) {
+function NavList({
+  active,
+  showLabels,
+  onNavigate,
+  role,
+}: {
+  active: NavKey
+  showLabels: boolean
+  onNavigate: () => void
+  role: string
+}) {
+  const items = NAV_ITEMS_BASE.filter((item) => !item.adminOnly || role === 'admin')
+
   return (
     <nav className="flex-1 px-2 py-4 space-y-0.5">
-      {NAV_ITEMS.map(({ key, label, href, icon: Icon }) => {
+      {items.map(({ key, label, href, icon: Icon }) => {
         const isActive = key === active
         return (
           <Link
@@ -53,7 +85,17 @@ function NavList({ active, showLabels, onNavigate }: { active: NavKey; showLabel
   )
 }
 
-export default function Sidebar({ active, displayName, email, role, onLogout, mobileOpen, onCloseMobile, collapsed, onToggleCollapsed }: SidebarProps) {
+export default function Sidebar({
+  active,
+  displayName,
+  email,
+  role,
+  onLogout,
+  mobileOpen,
+  onCloseMobile,
+  collapsed,
+  onToggleCollapsed,
+}: SidebarProps) {
   return (
     <>
       {/* Desktop / tablet sidebar */}
@@ -71,7 +113,7 @@ export default function Sidebar({ active, displayName, email, role, onLogout, mo
           </div>
         </div>
 
-        <NavList active={active} showLabels={!collapsed} onNavigate={onCloseMobile} />
+        <NavList active={active} showLabels={!collapsed} onNavigate={onCloseMobile} role={role} />
 
         <div className="border-t border-white/10 p-3 shrink-0">
           <div className="flex items-center gap-2.5 px-1 py-1.5">
@@ -119,7 +161,7 @@ export default function Sidebar({ active, displayName, email, role, onLogout, mo
             <CloseIcon className="w-5 h-5" />
           </button>
         </div>
-        <NavList active={active} showLabels onNavigate={onCloseMobile} />
+        <NavList active={active} showLabels onNavigate={onCloseMobile} role={role} />
         <div className="border-t border-white/10 p-3 shrink-0">
           <div className="flex items-center gap-2.5 px-1 py-1.5 mb-1">
             <div className="w-8 h-8 rounded-full bg-[#E5002B] text-white text-xs font-medium flex items-center justify-center shrink-0">

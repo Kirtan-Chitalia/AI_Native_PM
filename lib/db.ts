@@ -28,9 +28,8 @@ const ADMIN_EMAILS = [
   ...(process.env.ADMIN_EMAILS || '').split(',').map((e) => e.trim().toLowerCase()).filter(Boolean),
 ]
 
-// Auth is currently backed by an in-memory store (lib/store.ts), not this
-// database, so a logged-in user may not have a row here yet. Upsert one
-// on first touch so project/task foreign keys resolve.
+// Auth is now backed by Postgres. 
+// ensureUserAndOrg still ensures the org exists and creates the user stub if they login via OAuth or similar in the future.
 export async function ensureUserAndOrg(userId: string, email: string) {
   await query(
     `INSERT INTO organizations (id, name, slug)
@@ -39,18 +38,70 @@ export async function ensureUserAndOrg(userId: string, email: string) {
     [DEFAULT_ORG_ID]
   )
   const role = ADMIN_EMAILS.includes(email.toLowerCase()) ? 'admin' : 'user'
-  // Conflict target is (org_id, email), not id: the in-memory auth store can
-  // issue a fresh id for the same email after a server restart, and
-  // reassigning an existing user's id here would violate every FK that
-  // already points at their old projects/tasks/memberships.
-  const row = await queryOne<{ role: string }>(
+  
+  const row = await queryOne<{ role: string; profile_role: string; must_change_password: boolean }>(
     `INSERT INTO users (id, org_id, email, email_verified, display_name, role)
      VALUES ($1, $2, $3, TRUE, $4, $5)
      ON CONFLICT (org_id, email) DO UPDATE SET display_name = EXCLUDED.display_name, role = EXCLUDED.role
-     RETURNING role`,
+     RETURNING role, profile_role, must_change_password`,
     [userId, DEFAULT_ORG_ID, email, email.split('@')[0], role]
   )
-  return row!.role
+  return { 
+    role: row!.role, 
+    profileRole: row!.profile_role,
+    mustChangePassword: row!.must_change_password
+  }
+}
+
+export async function getUserByEmail(email: string) {
+  const row = await queryOne<any>(
+    `SELECT * FROM users WHERE email = $1`,
+    [email.toLowerCase()]
+  )
+  if (!row) return null
+  
+  // If they are an admin via env var, override their org role
+  const orgRole = ADMIN_EMAILS.includes(row.email) ? 'admin' : row.role
+  
+  return {
+    id: row.id,
+    email: row.email,
+    passwordHash: row.password_hash,
+    verified: row.email_verified,
+    createdAt: row.created_at,
+    role: orgRole,
+    profileRole: row.profile_role,
+    mustChangePassword: row.must_change_password,
+    totpEnabled: row.totp_enabled,
+  }
+}
+
+export async function updateUserPassword(userId: string, newHash: string) {
+  await query(
+    `UPDATE users SET password_hash = $1, must_change_password = FALSE WHERE id = $2`,
+    [newHash, userId]
+  )
+}
+
+export async function createDbUser(userId: string, email: string, passwordHash: string, profileRole: string, mustChangePassword: boolean) {
+  await query(
+    `INSERT INTO organizations (id, name, slug)
+     VALUES ($1, 'Default Organization', 'default')
+     ON CONFLICT (id) DO NOTHING`,
+    [DEFAULT_ORG_ID]
+  )
+  const role = ADMIN_EMAILS.includes(email.toLowerCase()) ? 'admin' : 'user'
+  
+  await query(
+    `INSERT INTO users (id, org_id, email, email_verified, display_name, role, password_hash, profile_role, must_change_password)
+     VALUES ($1, $2, $3, TRUE, $4, $5, $6, $7, $8)
+     ON CONFLICT (org_id, email) DO UPDATE SET 
+        password_hash = EXCLUDED.password_hash,
+        profile_role = EXCLUDED.profile_role,
+        must_change_password = EXCLUDED.must_change_password,
+        role = EXCLUDED.role`,
+    [userId, DEFAULT_ORG_ID, email, email.split('@')[0], role, passwordHash, profileRole, mustChangePassword]
+  )
 }
 
 export async function getUserTotpStatus(userId: string, email: string) {
@@ -64,6 +115,6 @@ export async function getCurrentUser() {
   if (!token) return null
   const payload = verifyToken(token)
   if (!payload) return null
-  const role = await ensureUserAndOrg(payload.userId, payload.email)
-  return { ...payload, role }
+  const { role, profileRole, mustChangePassword } = await ensureUserAndOrg(payload.userId, payload.email)
+  return { ...payload, role, profileRole, mustChangePassword }
 }

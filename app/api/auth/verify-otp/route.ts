@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { users, otpStore } from '@/lib/store'
+import { otpStore } from '@/lib/store'
+import { getUserByEmail, query } from '@/lib/db'
 import { signToken, setAuthCookie } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
@@ -38,13 +39,13 @@ export async function POST(req: NextRequest) {
     }
 
     // OTP valid — mark user as verified
-    const user = users.get(email.toLowerCase())
+    const user = await getUserByEmail(email.toLowerCase())
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
+    await query('UPDATE users SET email_verified = TRUE WHERE id = $1', [user.id])
     user.verified = true
-    users.set(email.toLowerCase(), user)
     otpStore.delete(email.toLowerCase())
 
     // Issue JWT and set HTTP-only cookie

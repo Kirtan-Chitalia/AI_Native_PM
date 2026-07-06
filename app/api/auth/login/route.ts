@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
-import { users } from '@/lib/store'
 import { signToken, setAuthCookie, signPendingTotpToken, setPendingTotpCookie } from '@/lib/auth'
-import { getUserTotpStatus } from '@/lib/db'
+import { getUserTotpStatus, getUserByEmail } from '@/lib/db'
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,7 +11,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
     }
 
-    const user = users.get(email.toLowerCase())
+    const user = await getUserByEmail(email)
 
     if (!user) {
       // Generic message to prevent user enumeration
