@@ -7,6 +7,7 @@ import { relativeTime } from '@/lib/relativeTime'
 import { STATUS_LABELS, STORY_POINTS } from '@/lib/badges'
 import { CloseIcon } from '@/components/icons'
 import Avatar from '@/components/Avatar'
+import ResearchPanel from '@/components/ResearchPanel'
 
 export interface DrawerTask {
   id: string
@@ -240,7 +241,7 @@ export default function TaskDrawer({ task, members, myRole, currentUserId, curre
               </div>
             </div>
 
-            <div>
+              <div>
               <h3 className="text-[11px] font-semibold uppercase tracking-wide text-[#9CA3AF] mb-2 pb-2 border-b border-[#E5E7EB] dark:border-[#2A2A2A]">Activity</h3>
               <ul className="space-y-1.5 text-[13px] text-[#6B7280] dark:text-[#9CA3AF]">
                 <li>• Created {relativeTime(task.created_at)}</li>
@@ -249,6 +250,10 @@ export default function TaskDrawer({ task, members, myRole, currentUserId, curre
                 )}
               </ul>
             </div>
+            
+              <div className="mt-6">
+                <ResearchPanel taskId={task.id} canGenerate={['admin','project_manager'].includes(myRole)} />
+              </div>
           </div>
         )}
       </div>

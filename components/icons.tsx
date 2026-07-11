@@ -107,3 +107,32 @@ export function MoonIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
+
+export function GanttIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" {...props}>
+      <rect x="2" y="4" width="6" height="3" rx="0.5" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="12" y="4" width="6" height="3" rx="0.5" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="2" y="12" width="10" height="3" rx="0.5" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  )
+}
+
+export function CalendarIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" {...props}>
+      <rect x="2" y="4" width="16" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M6 2v4M14 2v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+export function AnalyticsIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" {...props}>
+      <rect x="3" y="12" width="3" height="5" rx="0.5" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="9" y="8" width="3" height="9" rx="0.5" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="15" y="4" width="3" height="13" rx="0.5" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  )
+}

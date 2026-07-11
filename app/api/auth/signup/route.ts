@@ -64,6 +64,8 @@ async function _originalPost(req: NextRequest) {
       passwordHash,
       verified: false,
       createdAt: new Date(),
+      mustChangePassword: false,
+      profileRole: 'developer',
     })
 
     // Generate OTP (6 digits, 10 min expiry)

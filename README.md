@@ -1,13 +1,76 @@
 # Tasklynx
 
-A minimal project management app: email/OTP auth, projects, tasks, and project members. Built with Next.js 16 (App Router), TypeScript, Tailwind CSS, and PostgreSQL (via the `pg` pool — no ORM).
+Tasklynx is a project management app built with Next.js 16, React 19, TypeScript, Tailwind CSS, and PostgreSQL. It includes email/password sign-in with OTP and TOTP flows, projects, tasks, calendar and Gantt views, analytics, and a research workflow powered by the existing agent code in this repository.
 
-## Prerequisites
+## What’s In The App
 
-- Node.js 20+
-- PostgreSQL 16
+- Authentication: signup, login, OTP verification, password changes, logout, and optional TOTP 2FA.
+- Dashboard: role-aware overview with project and task summaries.
+- Projects: project list, project detail pages, members, task management, and AI task support.
+- Calendar: month-style calendar backed by `/api/calendar/events`.
+- Gantt: interactive timeline backed by `/api/projects/[id]/gantt` with drag, resize, and dependency rendering.
+- Analytics: overview stats from `/api/analytics/overview`.
+- Research: task-level research panel integrated into the task drawer.
+- Admin: user management and admin-only project/org access flows.
 
-## Local setup
+## Tech Stack
+
+- Next.js 16 App Router
+- React 19
+- TypeScript
+- PostgreSQL with `pg`
+- Tailwind CSS v4
+- Nodemailer for OTP email delivery
+- bcryptjs, jsonwebtoken, otplib, qrcode, uuid, date-fns
+
+## Repository Layout
+
+```text
+app/            App Router pages and API routes
+agents/         Existing AI agent services, prompts, and parsers
+components/     Shared UI components
+hooks/          Client hooks for theme, dismiss, and local storage
+lib/            Auth, DB, migrations, mail, password, and utility helpers
+postgres/       SQL schema, seed, indexes, triggers, and runtime migrations
+scripts/        Smoke test and Docker entrypoint scripts
+services/       Context services used by the app
+types/          Shared TypeScript types
+```
+
+## Environment
+
+The root `.env` in this workspace is set up for Docker Compose defaults:
+
+```bash
+POSTGRES_DB=pmplatform
+POSTGRES_USER=pmadmin
+POSTGRES_PASSWORD=devpassword
+DATABASE_URL=postgresql://pmadmin:devpassword@postgres:5432/pmplatform
+JWT_SECRET=dev_jwt_secret_change_me
+ADMIN_EMAILS=admin@eccouncil.org
+NODE_ENV=development
+PORT=3000
+```
+
+If you want to run the app directly with `npm run dev` against a local PostgreSQL instance instead of Docker, create `.env.local` and point `DATABASE_URL` at localhost, for example:
+
+```bash
+DATABASE_URL=postgresql://<user>:<password>@localhost:5432/pmplatform
+JWT_SECRET=any-random-string-for-dev
+ADMIN_EMAILS=you@eccouncil.org
+```
+
+Optional SMTP variables:
+
+```bash
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM=
+```
+
+## Run Locally
 
 Install dependencies:
 
@@ -15,11 +78,10 @@ Install dependencies:
 npm install
 ```
 
-Create a database and load the schema, in order:
+Prepare PostgreSQL, then load the schema files in order:
 
 ```bash
 createdb pmplatform
-
 cd postgres
 psql -d pmplatform -f init.sql
 psql -d pmplatform -f schema.sql
@@ -29,67 +91,90 @@ psql -d pmplatform -f triggers.sql
 psql -d pmplatform -f seed.sql
 ```
 
-Create `.env.local` in the project root:
-
-```
-DATABASE_URL=postgresql://<user>:<password>@localhost:5432/pmplatform
-JWT_SECRET=any-random-string-for-dev
-
-# Comma-separated list of emails that get the org-wide `admin` role
-# (sees and manages every project). Everyone else is `user`. Role is
-# re-derived from this list on every login.
-ADMIN_EMAILS=you@eccouncil.org
-
-# Optional — without these, the signup OTP is logged to the console and
-# returned as `devOTP` in the API response instead of being emailed.
-SMTP_HOST=
-SMTP_PORT=587
-SMTP_USER=
-SMTP_PASS=
-SMTP_FROM=
-```
-
-Run it:
+Start the dev server:
 
 ```bash
 npm run dev
 ```
 
-Open http://localhost:3000. Signup is restricted to `@eccouncil.org` email addresses.
+Open http://localhost:3000.
 
-## Docker
+## Run With Docker
+
+Bring up PostgreSQL and the app together:
 
 ```bash
-docker compose up -d
+docker compose up --build
 ```
 
-This starts Postgres only (schema auto-loaded on first boot). Run the app itself locally with `npm run dev` against it.
+The web container runs idempotent startup migrations before Next.js starts. The Postgres service and web service share the `tasklynx_net` network, so `DATABASE_URL=...@postgres:5432/...` resolves correctly.
 
-## Roles
+Run the containerized verification target:
 
-- **Org role** (`users.role`): `admin` or `user`. Admins see and manage every project in the org regardless of membership; configured via `ADMIN_EMAILS` (plus a hardcoded demo superadmin, see below), not a management UI. Everyone else only sees projects they're a member of.
-- **Project role** (`project_members.role`): `project_manager` or `developer`, scoped per project — the same person can be a project manager on one project and a developer on another. Project managers create projects, manage the project and its members; developers create/edit tasks. Add someone to a project by searching for them by name or email (`/api/users/search`) and picking a role.
-- **Demo superadmin**: `admin@eccouncil.org` / `Admin@123` is hardcoded in `lib/store.ts` and always resolves to the `admin` org role — this is for demos only and must be removed before any real launch (see the comment at its definition).
-- **TOTP 2FA**: users can enable an authenticator app (Microsoft/Google Authenticator, Authy, etc.) from Settings. Once enabled, login requires the 6-digit code after the password.
-
-## Project structure
-
-```
-app/page.tsx                        Login / signup / OTP verification
-app/dashboard/page.tsx               Dashboard (protected)
-app/projects/page.tsx                Project list + create
-app/projects/[id]/page.tsx           Project detail: overview, tasks, members
-app/api/auth/*                       Signup, login, logout, OTP, session
-app/api/projects/*                   Project + task + member CRUD
-app/api/users/route.ts               Org user directory
-lib/db.ts                            Postgres pool + query helpers
-lib/auth.ts                          JWT + cookie helpers
-lib/mail.ts                          OTP email delivery (nodemailer)
-lib/store.ts                         In-memory user/OTP store (auth is not yet Postgres-backed)
-postgres/*.sql                       Schema, in docker-entrypoint-initdb.d run order
+```bash
+docker compose run --rm verify
 ```
 
-## Notes
+Run the web container in migration-only mode:
 
-- Auth currently lives in an in-memory store + JWT cookie, not Postgres. The `users` table gets a row lazily created for you on first authenticated API call, so projects/tasks/members work against real foreign keys.
-- The default organization (`00000000-0000-0000-0000-000000000001`) is seeded automatically.
+```bash
+docker compose run --rm -e MIGRATION_ONLY=1 web
+```
+
+## Verify The Codebase
+
+```bash
+npm run typecheck
+npm run lint
+npm test
+npm run build
+```
+
+The repository also includes `npm run verify`, which runs typecheck plus the smoke test.
+
+## Database And Startup Notes
+
+- The Postgres init scripts in `postgres/` create the base schema and seed data on first boot.
+- `lib/migrate.ts` ensures the AI and extended project-management tables exist at runtime for the app routes that need them.
+- The Docker startup entrypoint uses `postgres/runtime_ai_migrations.sql` so the web container can prepare those tables before serving traffic.
+- Auth currently uses an in-memory user store plus JWT cookies; the Postgres `users` row is created lazily on first authenticated API call.
+- The demo admin account is still hardcoded in `lib/store.ts` and should be removed before a real production launch.
+
+## Major Features By Area
+
+- Authentication and security: `app/api/auth/*`, `lib/auth.ts`, `lib/password.ts`, `lib/totp.ts`, `lib/mail.ts`
+- Projects and tasks: `app/api/projects/*`, `app/projects/*`, `components/TaskDrawer.tsx`, `components/KanbanBoard.tsx`
+- Calendar: `app/api/calendar/events/route.ts`, `components/CalendarView.tsx`, `app/calendar/page.tsx`
+- Gantt: `app/api/projects/[id]/gantt/route.ts`, `components/GanttView.tsx`, `app/gantt/page.tsx`
+- Analytics: `app/api/analytics/overview/route.ts`, `app/analytics/page.tsx`
+- Research: `components/ResearchPanel.tsx`, `agents/research-agent/*`
+- Admin and org management: `app/api/admin/users/route.ts`, `app/settings/users/page.tsx`
+
+## Known Gaps
+
+- Auth is still not fully Postgres-backed.
+- Gantt and calendar still have room for richer UX and accessibility polish.
+- Analytics is an overview surface only; it does not yet expose full time-series dashboards.
+- Test coverage is still smoke-test heavy.
+
+## Verification Status
+
+The following checks have been run successfully in this workspace:
+
+```bash
+npm run typecheck
+npm run lint
+npm test
+npm run build
+docker compose build web
+docker compose run --rm -e MIGRATION_ONLY=1 web
+```
+
+## If You Only Want The Quick Start
+
+```bash
+npm install
+docker compose up --build
+```
+
+Then open http://localhost:3000.

@@ -3,9 +3,10 @@
 import Link from 'next/link'
 import {
   DashboardIcon, ProjectsIcon, TasksIcon, TeamIcon, SettingsIcon, ChevronLeftIcon, CloseIcon,
+  GanttIcon, CalendarIcon, AnalyticsIcon,
 } from '@/components/icons'
 
-export type NavKey = 'dashboard' | 'projects' | 'my-tasks' | 'team' | 'settings' | 'users'
+export type NavKey = 'dashboard' | 'projects' | 'gantt' | 'calendar' | 'analytics' | 'my-tasks' | 'team' | 'settings' | 'users'
 
 const NAV_ITEMS_BASE: {
   key: NavKey
@@ -16,6 +17,9 @@ const NAV_ITEMS_BASE: {
 }[] = [
   { key: 'dashboard', label: 'Dashboard', href: '/dashboard', icon: DashboardIcon },
   { key: 'projects', label: 'Projects', href: '/projects', icon: ProjectsIcon },
+  { key: 'gantt', label: 'Gantt', href: '/gantt', icon: GanttIcon },
+  { key: 'calendar', label: 'Calendar', href: '/calendar', icon: CalendarIcon },
+  { key: 'analytics', label: 'Analytics', href: '/analytics', icon: AnalyticsIcon },
   { key: 'my-tasks', label: 'My Tasks', href: '/dashboard', icon: TasksIcon },
   { key: 'team', label: 'Team', href: '/team', icon: TeamIcon },
   {

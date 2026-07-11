@@ -6,13 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "node ./scripts/smoke.js",
+    "verify": "npm run typecheck && npm run test"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "bcryptjs": "^3.0.3",
+    "date-fns": "^4.4.0",
     "framer-motion": "^12.42.2",
     "jsonwebtoken": "^9.0.3",
     "next": "16.2.9",

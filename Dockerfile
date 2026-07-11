@@ -18,7 +18,9 @@ ENV NODE_ENV=production
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+COPY scripts/docker-entrypoint.mjs ./scripts/docker-entrypoint.mjs
+COPY postgres/runtime_ai_migrations.sql ./postgres/runtime_ai_migrations.sql
 
 EXPOSE 3000
 ENV PORT=3000
-CMD ["node", "server.js"]
+CMD ["node", "scripts/docker-entrypoint.mjs"]

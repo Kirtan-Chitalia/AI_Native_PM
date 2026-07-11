@@ -1,5 +1,4 @@
 services:
-
   postgres:
     image: postgres:16-alpine
     container_name: pm_postgres
@@ -24,6 +23,60 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+    networks:
+      - tasklynx_net
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tasklynx_web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3000}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://pmadmin:devpassword@postgres:5432/pmplatform}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/_next/static || curl -f http://localhost:3000/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    volumes:
+      - next_cache:/app/.next
+    networks:
+      - tasklynx_net
+
+  verify:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tasklynx_verify
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3000}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://pmadmin:devpassword@postgres:5432/pmplatform}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["sh", "-lc", "npm run verify"]
+    restart: 'no'
+    networks:
+      - tasklynx_net
+
+networks:
+  tasklynx_net:
+    driver: bridge
 
 volumes:
   postgres_data:
+  next_cache:
